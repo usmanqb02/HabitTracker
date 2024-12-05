@@ -1,20 +1,19 @@
 // src/App.js
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
+import { Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-//import Dashboard from './pages/Dashboard';
-//import ProtectedRoute from './components/Auth/ProtectedRoute';
+//import RegisterPage from './pages/RegisterPage';
+import { AuthProvider } from './context/AuthContext';
 
-function App() {
+const App = () => {
   return (
     <AuthProvider>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        {/* <Route path="/dashboard" element={<ProtectedRoute component={Dashboard} />} /> */}
-      </Routes>
+         <Route path="/login" element={<LoginPage />} />
+         {/* <Route path="/register" element={<RegisterPage />} /> */}
+    </Routes>
     </AuthProvider>
   );
-}
+};
 
 export default App;

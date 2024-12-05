@@ -1,5 +1,5 @@
-// utils/tokenStorage.js
-export const saveToken = (token) => {
+// src/utils/tokenStorage.js
+export const storeToken = (token) => {
   localStorage.setItem('authToken', token);
 };
 
