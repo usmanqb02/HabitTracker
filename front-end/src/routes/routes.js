@@ -2,8 +2,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import React, { Suspense } from 'react';
 import ProtectedRoute from './protectedRoutes'; // Assuming it's a route protection logic
 
-const LoginScreen = React.lazy(() => import('../Screens/LoginScreen'));
-const Dashboard = React.lazy(() => import('../Screens/DashBoardScreen'));
+const LoginScreen = React.lazy(() => import('../screens/LoginScreen'));
+const Dashboard = React.lazy(() => import('../screens/DashBoardScreen'));
 
 const RouteConfig = () => {
   return (
@@ -14,8 +14,6 @@ const RouteConfig = () => {
           <Route element={<ProtectedRoute />}>  {/* Protected route wrapper */}
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/manageHabits" element={<Dashboard />} />
-            <Route path="/tracking" element={<Dashboard />} />
-            <Route path="/goals" element={<Dashboard />} />
             <Route path="/settings" element={<Dashboard />} />
           </Route>
           <Route path="*" element={<div>404 - Page Not Found</div>} />

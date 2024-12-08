@@ -5,12 +5,9 @@ import { ThemeProvider } from './theme/ThemeContext.js';
 const App = () => {
   return(
     <ThemeProvider>
-      <div className='App'>
         <RouteConfig/>
-      </div>
     </ThemeProvider>
       
   )
 }
-
 export default App;

@@ -5,8 +5,6 @@ import Navbar from '../components/DashBoard/Navbar';
 import Sidebar from '../components/DashBoard/Sidebar';
 import DashboardOverview from '../components/DashBoard/DashBoard';
 import HabitManagement from '../components/DashBoard/HabitManagement';
-import Tracking from '../components/DashBoard/Tracking';
-import Goals from '../components/DashBoard/Goals';
 import Settings from '../components/DashBoard/Settings';
 import "../theme/index.css"; 
 
@@ -28,8 +26,6 @@ const Dashboard = () => {
   const sectionComponents = {
     dashboard: <DashboardOverview />,
     manageHabits: <HabitManagement />,
-    tracking: <Tracking />,
-    goals: <Goals />,
     settings: <Settings />,
     profile: <div>Profile Page</div>,
   };

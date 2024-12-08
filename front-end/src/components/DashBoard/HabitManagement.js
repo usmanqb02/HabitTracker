@@ -9,6 +9,8 @@ const HabitManagement = () => {
   const [editHabit, setEditHabit] = useState(null);
   const [editedText, setEditedText] = useState('');
   const [selectedHabitId, setSelectedHabitId] = useState(null);
+  const [selectedDays, setSelectedDays] = useState([]);
+  const [duration, setDuration] = useState(0);
 
   const apiUrl = 'https://jsonplaceholder.typicode.com/posts';
 
@@ -29,12 +31,19 @@ const HabitManagement = () => {
       title: newHabit.trim(),
       body: newHabit.trim(),
       userId: 1,
+      days: selectedDays,
+      duration: duration,
+      streak: 0,  // Initialize streak
+      lastChecked: null,  // Initialize last checked time
+      checked: false, // Initialize checked status
     };
 
     axios.post(apiUrl, newHabitObj)
       .then(response => {
         setHabits([response.data, ...habits]);
         setNewHabit('');
+        setSelectedDays([]);
+        setDuration(1);
       })
       .catch(error => {
         console.error('Error adding habit:', error);
@@ -56,10 +65,18 @@ const HabitManagement = () => {
     setEditHabit(habit);
     setEditedText(habit.title);
     setSelectedHabitId(habit.id);
+    setSelectedDays(habit.days || []);
+    setDuration(habit.duration || 1);
   };
 
   const saveEditedHabit = () => {
-    const updatedHabit = { ...editHabit, title: editedText.trim(), body: editedText.trim() };
+    const updatedHabit = { 
+      ...editHabit, 
+      title: editedText.trim(), 
+      body: editedText.trim(), 
+      days: selectedDays, 
+      duration: duration 
+    };
 
     axios.patch(`${apiUrl}/${editHabit.id}`, updatedHabit)
       .then(response => {
@@ -69,16 +86,40 @@ const HabitManagement = () => {
         setEditHabit(null);
         setEditedText('');
         setSelectedHabitId(null);
+        setSelectedDays([]);
+        setDuration(1);
       })
       .catch(error => {
         console.error('Error updating habit:', error);
       });
   };
 
-  const toggleCheckStatus = (id) => {
-    setHabits(habits.map(habit =>
-      habit.id === id ? { ...habit, checked: !habit.checked } : habit
-    ));
+  const toggleCheckStatus = (id, e) => {
+    e.stopPropagation();  // Prevent triggering handleHabitClick
+    const habit = habits.find(h => h.id === id);
+    const currentTime = new Date().getTime();
+
+    // If last checked was within 24 hours, update streak
+    if (habit.lastChecked && currentTime - habit.lastChecked < 86) {
+      // If the habit was checked within the last 24 hours, do nothing
+      return;
+    }
+
+    // Reset streak if it's been more than 24 hours
+    const updatedHabit = {
+      ...habit,
+      lastChecked: currentTime,
+      streak: habit.lastChecked ? habit.streak + 1 : 1,
+      checked: !habit.checked, // Toggle checked status
+    };
+
+    axios.patch(`${apiUrl}/${habit.id}`, updatedHabit)
+      .then(response => {
+        setHabits(habits.map(h => h.id === id ? response.data : h));
+      })
+      .catch(error => {
+        console.error('Error toggling habit status:', error);
+      });
   };
 
   const handleHabitClick = (id) => {
@@ -89,6 +130,12 @@ const HabitManagement = () => {
     if (e.key === 'Enter') {
       addHabit();
     }
+  };
+
+  const handleDaySelection = (day) => {
+    setSelectedDays(prevDays => 
+      prevDays.includes(day) ? prevDays.filter(d => d !== day) : [...prevDays, day]
+    );
   };
 
   return (
@@ -114,14 +161,40 @@ const HabitManagement = () => {
           </button>
         </div>
 
+        {/* Days Selection */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Select Days</h3>
+          <div className="flex flex-wrap space-x-4">
+            {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+              <button
+                key={day}
+                onClick={() => handleDaySelection(day)}
+                className={`px-4 py-2 rounded-lg shadow-md ${selectedDays.includes(day) ? 'bg-[#14B8A6] text-white' : 'bg-gray-200 text-black'} transition-all duration-300 hover:bg-[#22D3EE]`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Duration Selection */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-2">Duration (Number of Days)</h3>
+          <input
+            type="number"
+            min="1"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            className="p-4 border-2 border-gray-300 rounded-lg text-lg focus:outline-none focus:ring-2 focus:ring-[#14B8A6] transition-all duration-300 ease-in-out shadow-md"
+          />
+        </div>
+
         {/* Habit List */}
         <div className="space-y-6">
           {habits.map((habit) => (
             <div
               key={habit.id}
-              className={`flex items-center justify-between p-6 rounded-lg shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 ${
-                habit.checked ? 'bg-green-100' : (theme === 'dark' ? 'bg-gray-700' : 'bg-white')
-              } border border-gray-700 hover:shadow-2xl cursor-pointer`}
+              className={`flex items-center justify-between p-6 rounded-lg shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 ${habit.checked ? 'bg-green-100' : (theme === 'dark' ? 'bg-gray-700' : 'bg-white')} border border-gray-700 hover:shadow-2xl cursor-pointer`}
               onClick={() => handleHabitClick(habit.id)}
             >
               {editHabit && editHabit.id === habit.id ? (
@@ -152,14 +225,23 @@ const HabitManagement = () => {
                     {habit.checked && (
                       <span className="ml-2 text-green-500 text-sm font-semibold">✔ Completed</span>
                     )}
+                    <div className="mt-2 text-sm">
+                      <strong>Days:</strong> {habit.days?.join(', ')}
+                    </div>
+                    <div className="text-sm">
+                      <strong>Duration:</strong> {habit.duration} days
+                    </div>
+                    <div className="text-sm">
+                      <strong>Streak:</strong> {habit.streak || 0} day(s)
+                    </div>
                   </div>
 
                   <div className="flex space-x-3">
                     <button
-                      onClick={() => toggleCheckStatus(habit.id)}
+                      onClick={(e) => toggleCheckStatus(habit.id, e)} // Pass event to prevent habit click
                       className="px-4 py-2 text-white bg-gradient-to-r from-[#14B8A6] to-[#22D3EE] rounded-lg shadow-md hover:bg-teal-600 transition-all duration-300"
                     >
-                      {habit.checked ? "❌ Uncheck" : "✅ Check"}
+                      {habit.lastChecked && new Date().getTime() - habit.lastChecked < 86400000 ? "❌ Uncheck" : "✅ Check"}
                     </button>
 
                     {selectedHabitId === habit.id && (
