@@ -1,5 +1,5 @@
 import React from 'react';
-import AuthorizationForm from '../components/AuthorizationForm';
+import AuthorizationForm from '../components/Login/AuthorizationForm';
 import appLogo from "../images/appLogo.jpg"
 
 const LoginScreen = () => {
