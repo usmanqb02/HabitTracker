@@ -1,0 +1,1 @@
+Teal (#14B8A6) and Cyan (#22D3EE) for key interactive elements such as buttons, and dark gray (#4B5563) for text can provide better clarity.
